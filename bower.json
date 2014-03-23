@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "jquery-color": "~2.1.2"
+    "jquery-color": "~2.1.2",
+    "jquery": "~2.1.0"
   }
 }
