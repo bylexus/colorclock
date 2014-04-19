@@ -34,7 +34,7 @@ body {
     position: absolute;
     font-family: 'clear_sans_thinregular';
     font-size: 36pt;
-    text-shadow: 1px 1px 4px white;
+    text-shadow: 1px 1px 2px black;
     width: 400px;
     height: 80px;
     top: 50%;
@@ -51,6 +51,8 @@ body {
     line-height: 25pt;
     font-size: 14pt;
     opacity: 0;
+    margin-top: 1em;
+    line-height: 16pt;
 }
 
 #modelChange {
@@ -360,8 +362,8 @@ function startup() {
 
 <body onload="startup()">
 <div id="timebox">
-    <span class="time"></span><br />
-    <span class="addinfo"></span>
+    <div class="time"></div>
+    <div class="addinfo"></div>
 </div>
 
 <div id="copyright">
@@ -371,7 +373,7 @@ function startup() {
 
 <div id="modelChange">
 <label for="modelSelect">Select color model: </label>
-<select id="modelSelect" onchange="colorModel = this.value">
+<select id="modelSelect" onchange="colorModel = this.value;counter = 0;">
     <option value="hmsColors">H:M:S Colors (changes every sec)</option>
     <option value="triangleColors" selected="selected">Smooth Colors (changes ~48secs)</option>
     <option value="rgbColorWheel">RGB Color Wheel</option>
