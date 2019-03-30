@@ -1,13 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"  manifest="application.appcache">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
         <meta name="keywords" content="javascript,color,clock,color clock,color names,rgb" />
         <meta name="author" content="Alexander Schenkel" />
         <title>Colorclock</title>
-        <link href="https://fonts.googleapis.com/css?family=Montserrat|Oxygen+Mono" rel="stylesheet">
+        <link rel="manifest" href="manifest.json" />
+
         <style type="text/css">
+/* montserrat-regular - latin */
+@font-face {
+  font-family: 'Montserrat';
+  src: local('Montserrat'), local('Montserrat-Regular'),
+       url('fonts/montserrat-v13-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/montserrat-v13-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* oxygen-mono-regular - latin */
+@font-face {
+  font-family: 'Oxygen Mono';
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'),
+       url('fonts/oxygen-mono-v6-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('fonts/oxygen-mono-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
 html, body, #main {
     margin: 0;
     padding: 0;
