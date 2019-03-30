@@ -1,0 +1,94 @@
+{
+    "name": "colorclock",
+    "version": "2.0.0",
+    "description": "A clock that changes color by time of day",
+    "main": "index.js",
+    "dependencies": {},
+    "devDependencies": {
+        "eslint": "^5.15.3",
+        "eslint-config-prettier": "^4.1.0",
+        "eslint-plugin-prettier": "^3.0.1",
+        "prettier": "^1.16.4"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "-"
+    },
+    "author": "Alexander Schenkel",
+    "license": "MIT",
+    "prettier": {
+        "printWidth": 120,
+        "tabWidth": 4,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "none"
+    },
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "eslint:recommended",
+            "prettier"
+        ],
+        "parserOptions": {
+            "ecmaVersion": 8,
+            "sourceType": "module"
+        },
+        "env": {
+            "browser": true,
+            "es6": true
+        },
+        "plugins": [
+            "prettier"
+        ],
+        "rules": {
+            "prettier/prettier": [
+                "error",
+                {
+                    "singleQuote": true,
+                    "tabWidth": 4,
+                    "printWidth": 120
+                }
+            ],
+            "no-unused-vars": [
+                "error",
+                {
+                    "vars": "all",
+                    "args": "none"
+                }
+            ],
+            "semi": [
+                "error",
+                "always"
+            ],
+            "curly": "error",
+            "eqeqeq": "error",
+            "no-eval": "error",
+            "no-loop-func": "error",
+            "radix": "error",
+            "comma-dangle": "error",
+            "no-undef": "error",
+            "no-console": [
+                "error",
+                {
+                    "allow": [
+                        "log",
+                        "warn",
+                        "error",
+                        "info",
+                        "group",
+                        "groupCollapsed",
+                        "groupEnd",
+                        "trace"
+                    ]
+                }
+            ]
+        },
+        "globals": {
+        }
+    }
+
+}

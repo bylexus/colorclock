@@ -1,402 +1,158 @@
 <!DOCTYPE html>
-<html>
-<head>
-<title>ColorClock by alexi.ch</title>
-<meta name="keywords" content="javascript,color,clock,color clock,color names,rgb"/>
-<meta name="author" content="Alexander Schenkel" />
-<script src="ntc.js"></script>
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
-<script src="bower_components/jquery-color/jquery.color.js"></script>
-<script src="js/jquery.animate-shadow-min.js"></script>
-
-<style type="text/css">
-
-@font-face {
-    font-family: 'clear_sans_thinregular';
-    src: url('fonts/clearsans_thin_macroman/ClearSans-Thin-webfont.eot');
-    src: url('fonts/clearsans_thin_macroman/ClearSans-Thin-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/clearsans_thin_macroman/ClearSans-Thin-webfont.woff') format('woff'),
-         url('fonts/clearsans_thin_macroman/ClearSans-Thin-webfont.ttf') format('truetype'),
-         url('fonts/clearsans_thin_macroman/ClearSans-Thin-webfont.svg#clear_sans_thinregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-
-
-body {
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+        <meta name="keywords" content="javascript,color,clock,color clock,color names,rgb" />
+        <meta name="author" content="Alexander Schenkel" />
+        <title>Colorclock</title>
+        <link href="https://fonts.googleapis.com/css?family=Montserrat|Oxygen+Mono" rel="stylesheet">
+        <style type="text/css">
+html, body, #main {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
 }
 
-#timebox {
-    position: absolute;
-    font-family: 'clear_sans_thinregular';
-    font-size: 36pt;
-    text-shadow: 1px 1px 2px black;
-    width: 400px;
-    height: 80px;
-    top: 50%;
-    margin-top: -40px;
-    left: 50%;
-    margin-left: -200px;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 80px;
-    box-shadow: 0 0 10px white, inset 0 0 10px white;
-}
+    #main {
+        background-color: #000000;
+        transition: background-color 1s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    #name {
+        color: black;
+        transition: color 1s, text-shadow 1s;
+        text-shadow: 0 1px  1px black;
+        font-size: 5vw;
+        font-family: 'Montserrat';
+        text-align:center;
+    }
+    #time {
+        color: black;
+        transition: color 1s;
+        transition: color 1s, text-shadow 1s;
+        text-shadow: 0 2px  1px black;
+        text-align: center;
+        font-size: 16vw;
+        font-family: 'Oxygen Mono';
+    }
 
-#timebox .addinfo {
-    line-height: 25pt;
-    font-size: 14pt;
-    opacity: 0;
-    margin-top: 1em;
-    line-height: 16pt;
-}
+    #settings-container {
+        display: block;
+        opacity: 0;
+        transition: visibility 0.3s, opacity 0.3s;
+        visibility: hidden;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0,0,0,0.6);
+    }
 
-#modelChange {
-    position: fixed;
-    font-family: 'clear_sans_thinregular';
-    font-size: 10.5pt;
-    width: 300px;
-    right: 3px;
-    bottom: 3px;
-    text-align: right;
-    opacity: 0;
-}
+    #settings-container.on {
+        visibility: visible;
+        opacity: 1;
+    }
 
-#infobox {
-    opacity: 0;
-    position: fixed;
-    width: 200px;
-    left: 3px;
-    bottom: 3px;
-    padding: 3px;
-    font-family: 'clear_sans_thinregular';
-    font-size: 14px;
-    overflow: none;
-    box-shadow: 2px -2px 10px white;
-}
-#infobox .title {
-    text-align: right;
-    margin-left: 1cm;
-}
-#infobox .content {
-    border-top: 1px solid;
-}
+    #settings {
+        font-family: 'Montserrat';
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(255,255,255,0);
+        transition: left 0.3s, top 0.3s, background-color 0.3s, box-shadow 0.3s;
+        box-shadow: 0 0 0 rgba(0,0,0,0);
+        display: flex;
+        flex-direction: column;
 
+    }
+    #settings-container.on #settings {
+        box-shadow: 0 0 100px rgba(0,0,0,0.8);
+        background-color: rgba(255,255,255,0.9);
+    }
+    @media (orientation: portrait) {
+        #settings {
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 50%;
 
-#copyright {
-    position: fixed;
-    width: 100%;
-    bottom: 3px;
-    font-family: 'clear_sans_thinregular';
-    font-size: 10pt;
-    text-align: center;
-    opacity: 0;
-}
-
-</style>
-
-
-<script type="text/javascript">
-
-function pad (str, max) {
-  str = str.toString();
-  return str.length < max ? pad("0" + str, max) : str;
-}
-
-function getNtc(rgbstr) {
-    var n_match  = ntc.name(rgbstr);
-    n_rgb        = n_match[0]; // RGB value of closest match
-    n_name       = n_match[1]; // Text string: Color name
-    n_exactmatch = n_match[2]; // True if exact color match
-    return n_name;
-}
-
-
-function getHMSColorValues() {
-    var d = new Date();
-    var s_color = Math.floor(d.getSeconds()*255/60);
-    var m_color = Math.floor(d.getMinutes()*255/60);
-    var h_color = Math.floor(d.getHours()*255/24);
-    return {
-        date: d,
-        h_color: h_color,
-        m_color: m_color,
-        s_color: s_color,
-        css_color: $.Color(h_color,m_color,s_color).toHexString()
-    };
-}
-
-function getColorWheelValues() {
-    // The color wheel is defined as segments with the rgb values to reach.
-    // when traversing from one segment to the other, the color value
-    // which need to be changed from 0% to 100% uses the following
-    // formula: w(col) = (log(x+1))/log(2)
-    // The color value changing from 100% to 0% is calculated:
-    // w(col) = (log(-x+2))/log(2)
-    // while x is a value from 0 to 1, indicating the progress between a segment.
-    //
-    // There are 8 segments, while each segment traversal represents 12'342 secs (86400/7).
-    // So the left and right segment is found: s(l) = floor(86400/NowSecs), s(r) = (s(l)+1)%7
-
-    var segments = [
-        [0,0,0], // r,g,b percentage to reach
-        [1,0,0],
-        [1,1,0],
-        [0,1,0],
-        [1,1,1]
-        [0,1,1],
-        [0,0,1],
-        [1,0,1]
-    ];
-    var len = segments.length;
-
-    var now = new Date()
-    var dayStart = new Date();
-    dayStart.setHours(0);
-    dayStart.setMinutes(0);
-    dayStart.setSeconds(0);
-    dayStart.setMilliseconds(0);
-
-    var daySecs = 24*60*60;
-    var segSize = Math.floor(daySecs / len); // seconds per segment
-    var secsSinceDayStart = Math.floor((now.getTime() - dayStart.getTime())/1000);
-    var segment = segments[Math.floor(secsSinceDayStart/segSize)%len];
-    var nextSeg = segments[(Math.floor(secsSinceDayStart/segSize)+1)%len];
-    var posInSeg = (secsSinceDayStart % segSize) / segSize; // number from 0..1 indicating the transition percentage between 2 segments
-
-    var res = [0,0,0];
-    for (var i = 0; i < 3; i++) {
-        if (segment[i] == 0 && nextSeg[i] == 0) {
-            res[i] = 0;
-            continue;
         }
-        if (segment[i] == 1 && nextSeg[i] == 1)  {
-            res[i] = 1;
-            continue;
+        #settings-container.on #settings {
+            top: 50%;
         }
-        if (segment[i] == 1) {
-            res[i] = (Math.log((-1*posInSeg)+2))/Math.log(2);
-        } else {
-            res[i] = (Math.log(posInSeg+1))/Math.log(2);
+    }
+    @media (orientation: landscape) {
+        #settings {
+            top: 0;
+            left: -50%;
+            width: 50%;
+            height: 100%;
+        }
+        #settings-container.on #settings {
+            left: 0;
         }
     }
 
-
-    var r = Math.floor(255*res[0]);
-    var g = Math.floor(255*res[1]);
-    var b = Math.floor(255*res[2]);
-    return {
-        date: now,
-        h_color: r,
-        m_color: g,
-        s_color: b,
-        css_color: $.Color(r,g,b).toHexString()
-    };
-}
-
-
-
-// Triangle function with zero point at x=0,y=0,
-// with y = 0..1, and a certain y=1 on x=1.
-function getTriangleValue(x,speed) {
-    var r = Math.abs(Math.abs(((Math.pow(2,speed)-1)*x-1)%2)-1);
-    return r;
-}
-
-
-function getTriangleColorValues() {
-    var now = new Date()
-    var dayStart = new Date();
-    dayStart.setHours(0);
-    dayStart.setMinutes(0);
-    dayStart.setSeconds(0);
-    dayStart.setMilliseconds(0);
-
-    var msPerDay = 24*60*60*1000;
-    var msSinceDayStart = now.getTime() - dayStart.getTime();
-    var msPerc = msSinceDayStart / msPerDay;
-
-    var h_val = Math.round(255*(getTriangleValue(msPerc,1)));
-    var m_val = Math.round(255*(getTriangleValue(msPerc,2)));
-    var s_val = Math.round(255*(getTriangleValue(msPerc,3)));
-    return {
-        date: now,
-        h_color: h_val,
-        m_color: m_val,
-        s_color: s_val,
-        css_color: $.Color(h_val,m_val,s_val).toHexString()
+    #settings .settings-form {
+        padding: 5pt;
     }
-}
-
-
-function getRandomColorValues() {
-    var now = new Date();
-
-    randomValues = {
-        h_color: Math.floor(Math.random()*255),
-        m_color: Math.floor(Math.random()*255),
-        s_color: Math.floor(Math.random()*255)
+    #settings .settings-form div {
+        margin-top: 10px;
     }
-    return {
-        date: now,
-        h_color: randomValues.h_color,
-        m_color: randomValues.m_color,
-        s_color: randomValues.s_color,
-        css_color: $.Color(randomValues.h_color,randomValues.m_color,randomValues.s_color).toHexString()
+    #settings .settings-form label {
+        font-size: 1rem;
     }
-}
+    #settings .settings-form label select {
+        display: block;
+    }
+    #settings .settings-form label input {
+        display: block;
+    }
+        </style>
+    </head>
+    <body>
+        <div id="main">
+            <div id="time"></div>
+            <div id="name"></div>
 
-function updateText(data) {
-    var hours = pad(data.date.getHours(),2);
-    var minutes = pad(data.date.getMinutes(),2);
-    var seconds = pad(data.date.getSeconds(),2);
-    $('#timebox .time').html(hours+':'+minutes+':'+seconds);
-    $('#timebox .addinfo').html('Actual color: '+data.css_color+'<br/>('+getNtc(data.css_color)+')');
-}
+            <div id="settings-container">
+                <div id="settings">
+                    <div style="display:flex;align-items:center;flex-direction:row;justify-content:space-between">
+                        <span style="padding: 5px;font-size:0.7rem;">colorclock by <a href="https://alexi.ch/">alexi.ch</span>
+                        <a href="#"
+                           id="closeMenu"
+                           style="width:20px;height:20px;display:block;text-align:center;margin:5px;padding:5px;border-radius:50%;border:2px solid black;font-family:'Oxygen Mono';text-decoration:none;color:black"
+                           >X</a></div>
+                    <div class="settings-form" style="flex-grow: 1">
+                        <div>
+                            <label>Color Algorithm
+                                <select id="algorithm">
+                                    <option value="getLinearColorForDayTime">Linear color (from dark to light) per daytime</option>
+                                    <option value="getRgbColorWheelValue">RGB Color Wheel Value</option>
+                                    <option value="getRandomColorValue">Random color value</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div>
+                            <label>Update interval [s]
+                                <input id="interval" type="number" min="1" id="updateInterval" value="3"/>
+                            </label>
+                        </div>
+                        <div>
+                            <button id="goFullscreen" type="button">toggle Fullscreen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-function updateColors(data,duration) {
-    $('#timebox').animate({
-        color: $.Color(255-data.h_color,255-data.m_color,255-data.s_color)
-    }, duration);
-
-    $('body').animate({
-        backgroundColor: $.Color(data.h_color,data.m_color,data.s_color)
-    }, duration);
-
-    $('#modelChange').animate({
-        color: $.Color(255-data.h_color,255-data.m_color,255-data.s_color)
-    }, duration);
-
-    $('#infobox').animate({
-        color: $.Color(data.h_color,data.m_color,data.s_color),
-        borderColor: $.Color(data.h_color,data.m_color,data.s_color),
-        backgroundColor: $.Color(255-data.h_color,255-data.m_color,255-data.s_color)
-    }, duration);
-
-    $('#copyright').animate({
-        color: $.Color(255-data.h_color,255-data.m_color,255-data.s_color)
-    }, duration);
-
-}
-
-var colorModel;
-var counter = 0;
-function startup() {
-    colorModel = $('#modelSelect').val();
-    var c;
-    setInterval(function() {
-            if (colorModel == 'hmsColors') {
-                c = getHMSColorValues();
-                updateText(c);
-                updateColors(c,900);
-            }
-            if (colorModel == 'triangleColors') {
-                c = getTriangleColorValues();
-                updateText(c);
-                updateColors(c,900);
-            }
-            if (colorModel == 'rgbColorWheel') {
-                c = getColorWheelValues();
-                updateText(c);
-                updateColors(c,900);
-            }
-            if (colorModel == 'random') {
-                if (counter % 30 == 0) {
-                    c = getRandomColorValues();
-                    updateColors(c,900);
-                }
-                c.date = new Date();
-                updateText(c);
-                counter = (counter+1)%30;
-            }
-    },1000);
-
-    var origWidth = $('#infobox').width();
-    $('#infobox').on('mouseenter',function(evt) {
-        $('#infobox').animate({
-            width: 500
-        },{duration: 300, queue: false});
-        $('#infobox .content').slideDown(300);
-    });
-
-    $('#infobox').on('mouseleave',function(evt) {
-        $('#infobox').animate({
-            width: origWidth
-        },{duration: 300, queue: false});
-        $('#infobox .content').slideUp(300);
-    });
-
-    var showElements = false;
-    var showTimer = null;
-    var showSelector = '#infobox,#timebox .addinfo,#copyright, #modelChange';
-    $(document).on('mousemove', function() {
-        if (!showElements) {
-            showElements = true;
-            clearTimeout(showTimer);
-            showTimer = setTimeout(function(){
-                showElements = false;
-                $(showSelector).animate({
-                    opacity: 0
-                },{
-                    duration: 800,
-                    queue: false
-                });
-            },10000);
-
-            $(showSelector).animate({
-                opacity: 1
-            },{
-                duration: 800,
-                queue: false
-            });
-        }
-    });
-}
-
-</script>
-</head>
-
-<body onload="startup()">
-<div id="timebox">
-    <div class="time"></div>
-    <div class="addinfo"></div>
-</div>
-
-<div id="copyright">
-&copy; 2011-2014 by Alexander Schenkel, <a href="mailto:alex@alexi.ch">alex@alexi.ch</a>
-</div>
-
-
-<div id="modelChange">
-<label for="modelSelect">Select color model: </label>
-<select id="modelSelect" onchange="colorModel = this.value;counter = 0;">
-    <option value="hmsColors">H:M:S Colors (changes every sec)</option>
-    <option value="triangleColors" selected="selected">Smooth Colors (changes ~48secs)</option>
-    <option value="rgbColorWheel">RGB Color Wheel</option>
-    <option value="random">Randomness</option>
-</select>
-</div>
-
-<div id="infobox">
-    <div class="title" id="infotitle"><strong>What is it about?</strong></div>
-    <div class="content" style="display: none; width: 500px;" id="infocontent">
-    The color clock is a small experiment playing with colors related to
-    the time of the day. It calculates a color for every time of the day within
-    24h, trying to use the whole RGB spectrum. So the color is like a
-    'mood' for the time of the day. There are the following modes today:
-        <ul>
-            <li>H:M:S colors: The hour, minute and second part of the time are taken as r,g,b value. This gives a new color for every second of the day :-)</li>
-            <li>Smooth Colors: Tries to apply all colors over the day smoothly (without jumping), and uses a sophisticated triangle algorithms for this.</li>
-            <li>RGB Color Wheel: Moves through the RGB colors during the day. Changes about all 48 seconds.</li>
-            <li>Randomness: Changes colors, well, randomly. Every 30 seconds, a new color is chosen and faded into it within 10 secs.</li>
-        </ul>
-    This little experiment makes use of the <a href="http://chir.ag/projects/ntc/">'Name That Color'</a> JS Library from Chirag Mehta.
-    </div>
-
-</div>
-</body>
+        <script type="module" src="main.js"></script>
+    </body>
 </html>
