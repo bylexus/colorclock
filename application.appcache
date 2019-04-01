@@ -1,13 +1,13 @@
 CACHE MANIFEST
 # rev 3
 CACHE:
-manifest.json
-main.js
-ntc.js
-fonts/montserrat-v13-latin-regular.woff2
-fonts/montserrat-v13-latin-regular.woff
-fonts/oxygen-mono-v6-latin-regular.woff2
-fonts/oxygen-mono-v6-latin-regular.woff
+manifest.webmanifest
+main.*.js
+fonts/montserrat-v13-latin-regular.*.woff2
+fonts/montserrat-v13-latin-regular.*.woff
+fonts/oxygen-mono-v6-latin-regular.*.woff2
+fonts/oxygen-mono-v6-latin-regular.*.woff
+styles.*.css
 
 NETWORK:
 *

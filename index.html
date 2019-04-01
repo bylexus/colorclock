@@ -1,174 +1,17 @@
 <!DOCTYPE html>
-<html lang="en"  manifest="application.appcache">
+<html lang="en"  manifest="./application.appcache">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
         <meta name="keywords" content="javascript,color,clock,color clock,color names,rgb" />
         <meta name="author" content="Alexander Schenkel" />
         <title>Colorclock</title>
-        <link rel="manifest" href="manifest.json" />
+        <link rel="manifest" href="./manifest.webmanifest" />
+        <link rel="stylesheet" href="./styles.scss" />
 
-        <style type="text/css">
-/* montserrat-regular - latin */
-@font-face {
-  font-family: 'Montserrat';
-  src: local('Montserrat'), local('Montserrat-Regular'),
-       url('fonts/montserrat-v13-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('fonts/montserrat-v13-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-
-/* oxygen-mono-regular - latin */
-@font-face {
-  font-family: 'Oxygen Mono';
-  src: local('Oxygen Mono'), local('OxygenMono-Regular'),
-       url('fonts/oxygen-mono-v6-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('fonts/oxygen-mono-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-html, body, #main {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-}
-
-    #main {
-        background-color: #000000;
-        transition: background-color 1s;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-    #name {
-        color: black;
-        transition: color 1s, text-shadow 1s;
-        text-shadow: 0 1px  1px black;
-        font-size: 5vw;
-        font-family: 'Montserrat';
-        text-align:center;
-    }
-    #time {
-        color: black;
-        transition: color 1s;
-        transition: color 1s, text-shadow 1s;
-        text-shadow: 0 2px  1px black;
-        text-align: center;
-        font-size: 16vw;
-        font-family: 'Oxygen Mono';
-    }
-
-    #settings-container {
-        display: block;
-        opacity: 0;
-        transition: visibility 0.3s, opacity 0.3s;
-        visibility: hidden;
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background-color: rgba(0,0,0,0.6);
-    }
-
-    #settings-container.on {
-        visibility: visible;
-        opacity: 1;
-    }
-
-    #settings {
-        font-family: 'Montserrat';
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: rgba(255,255,255,0);
-        transition: left 0.3s, top 0.3s, background-color 0.3s, box-shadow 0.3s;
-        box-shadow: 0 0 0 rgba(0,0,0,0);
-        display: flex;
-        flex-direction: column;
-
-    }
-    #settings-container.on #settings {
-        box-shadow: 0 0 100px rgba(0,0,0,0.8);
-        background-color: rgba(255,255,255,0.9);
-    }
-    @media (orientation: portrait) {
-        #settings {
-            top: 100%;
-            left: 0;
-            width: 100%;
-            height: 50%;
-
-        }
-        #settings-container.on #settings {
-            top: 50%;
-        }
-    }
-    @media (orientation: landscape) {
-        #settings {
-            top: 0;
-            left: -50%;
-            width: 50%;
-            height: 100%;
-        }
-        #settings-container.on #settings {
-            left: 0;
-        }
-    }
-
-    #settings .settings-form {
-        padding: 5pt;
-    }
-    #settings .settings-form div {
-        margin-top: 10px;
-    }
-    #settings .settings-form label {
-        font-size: 1rem;
-    }
-    #settings .settings-form label select {
-        display: block;
-    }
-    #settings .settings-form label input {
-        display: block;
-    }
-        </style>
     </head>
     <body>
-        <div id="main">
-            <div id="time"></div>
-            <div id="name"></div>
 
-            <div id="settings-container">
-                <div id="settings">
-                    <div style="display:flex;align-items:center;flex-direction:row;justify-content:space-between">
-                        <span style="padding: 5px;font-size:0.7rem;">colorclock by <a href="https://alexi.ch/">alexi.ch</span>
-                        <a href="#"
-                           id="closeMenu"
-                           style="width:20px;height:20px;display:block;text-align:center;margin:5px;padding:5px;border-radius:50%;border:2px solid black;font-family:'Oxygen Mono';text-decoration:none;color:black"
-                           >X</a></div>
-                    <div class="settings-form" style="flex-grow: 1">
-                        <div>
-                            <label>Color Algorithm
-                                <select id="algorithm">
-                                    <option value="getLinearColorForDayTime">Linear color (from dark to light) per daytime</option>
-                                    <option value="getRgbColorWheelValue">RGB Color Wheel Value</option>
-                                    <option value="getRandomColorValue">Random color value</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div>
-                            <label>Update interval [s]
-                                <input id="interval" type="number" min="1" id="updateInterval" value="3"/>
-                            </label>
-                        </div>
-                        <div>
-                            <button id="goFullscreen" type="button">toggle Fullscreen</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <script type="module" src="main.js"></script>
+        <script type="text/javascript" src="main.js"></script>
     </body>
 </html>

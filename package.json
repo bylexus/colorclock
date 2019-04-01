@@ -5,13 +5,22 @@
     "main": "index.js",
     "dependencies": {},
     "devDependencies": {
+        "appcache-manifest": "^2.1.0",
+        "babel-core": "^6.26.3",
+        "babel-preset-preact": "^1.1.0",
+        "cp": "^0.2.0",
         "eslint": "^5.15.3",
         "eslint-config-prettier": "^4.1.0",
         "eslint-plugin-prettier": "^3.0.1",
-        "prettier": "^1.16.4"
+        "parcel-bundler": "^1.12.3",
+        "preact": "^8.4.2",
+        "prettier": "^1.16.4",
+        "sass": "^1.17.3"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "dev": "mkdir -p dev-dist/ && npx cp application.appcache dev-dist/ && parcel -d dev-dist/ index.html && appcache-manifest -p './' --network-star -o dev-dist/application.appcache dist/*",
+        "build": "rm -rf dist/ && parcel build --public-url ./ index.html && npx cp application.appcache dist/ && appcache-manifest -p './' --network-star -o dist/application.appcache dist/*",
+        "docker-alex": "docker run --rm -ti -w /src -v /Users/alex/dev/colorclock.alexi.ch:/src -p 1234:1234 node:10 bash"
     },
     "repository": {
         "type": "git",
@@ -87,8 +96,6 @@
                 }
             ]
         },
-        "globals": {
-        }
+        "globals": {}
     }
-
 }

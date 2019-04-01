@@ -1,211 +1,170 @@
-import ntc from './ntc.js';
+import { h, render, Component } from 'preact';
+import { algoMap, inverseColor } from './lib';
 
-const dayInMs = 24 * 60 * 60 * 1000;
-const nrOfColors = Math.pow(256, 3);
-const nrOfAvailableColors = ntc.names.length;
+class Main extends Component {
+    constructor() {
+        super();
 
-function getPercentageOfDay() {
-    const now = new Date().getTime();
-    return (now % dayInMs) / dayInMs;
-}
+        this.state = {
+            time: new Date(),
+            algorithm: Object.keys(algoMap)[0],
+            backgroundColor: '#000',
+            inverseColor: '#000',
+            textColor: '#000',
+            colorName: 'black',
+            textShadow: 'none',
+            updateInterval: 3000,
+            showMenu: false
+        };
 
-/**
- * RGB Color Wheel:
- *
- *     Red        Yellow       Green        Cyan         Blue         Magenta       Red
- *         |------------|------------|------------|------------|------------|------------|
- *R:G:B:  1:0:0       1:1:0        0:1:0       0:1:1         0:0:1       1:0:1         1:0:0
- *         0            1/6          2/6         3/6           4/6         5/6           6/6 = 0
- *
- */
-function getRgbColorWheelValue() {
-    let perc = getPercentageOfDay();
-    let r,
-        g,
-        b = 0;
-    if (perc <= 1 / 6) {
-        r = 255;
-        g = 6 * perc * 255;
-        b = 0;
-    } else if (perc <= 2 / 6) {
-        r = 6 * (2 / 6 - perc) * 255;
-        g = 255;
-        b = 0;
-    } else if (perc <= 3 / 6) {
-        r = 0;
-        g = 255;
-        b = 6 * (perc - 2 / 6) * 255;
-    } else if (perc <= 4 / 6) {
-        r = 0;
-        g = 6 * (4 / 6 - perc) * 255;
-        b = 255;
-    } else if (perc <= 5 / 6) {
-        r = 6 * (perc - 4 / 6) * 255;
-        g = 0;
-        b = 255;
-    } else if (perc <= 6 / 6) {
-        r = 255;
-        g = 0;
-        b = 6 * (6 / 6 - perc) * 255;
+        this.displayMenu = this.displayMenu.bind(this);
+        this.hideMenu = this.hideMenu.bind(this);
+        this.onAlgoChange = this.onAlgoChange.bind(this);
+
+        setTimeout(() => {
+            this.update();
+        }, 100);
     }
-    r = Math.floor(r);
-    g = Math.floor(g);
-    b = Math.floor(b);
-    let hex = '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
-    let colorInfo = ntc.name(hex);
 
-    let hsl = ntc.hsl(colorInfo[0]);
-
-    return {
-        name: colorInfo[1],
-        hex: colorInfo[0],
-        r,
-        g,
-        b,
-        hsl
-    };
-}
-
-/**
- * Linear color function, from 0 (black) to fff (white), by percentage of the day's progress
- */
-function getLinearColorForDayTime() {
-    let index = Math.floor(nrOfAvailableColors * getPercentageOfDay());
-    let color = ntc.names[index];
-    let rgb = ntc.rgb(color[0]);
-    let hsl = ntc.hsl('#' + color[0]);
-    return {
-        name: color[1],
-        hex: '#' + color[0],
-        r: rgb[0],
-        g: rgb[1],
-        b: rgb[2],
-        hsl
-    };
-}
-
-/**
- * Random function
- */
-function getRandomColorValue() {
-    let index = Math.floor(nrOfAvailableColors * Math.random());
-    let color = ntc.names[index];
-    let rgb = ntc.rgb(color[0]);
-    let hsl = ntc.hsl('#' + color[0]);
-    let value = {
-        name: color[1],
-        hex: '#' + color[0],
-        r: rgb[0],
-        g: rgb[1],
-        b: rgb[2],
-        hsl
-    };
-    return value;
-}
-
-function inverseColor(r, g, b) {
-    return {
-        r: 255 - r,
-        g: 255 - g,
-        b: 255 - b
-    };
-}
-
-function updateTime(timeEl) {
-    let now = new Date();
-    timeEl.innerHTML = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(
-        2,
-        '0'
-    )}:${String(now.getSeconds()).padStart(2, '0')}`;
-}
-
-function update(colorEl, nameEl, timeEl, algorithm) {
-    // let colorInfo = getLinearColorForDayTime();
-    // let colorInfo = getRgbColorWheelValue();
-    let colorInfo = algorithm();
-    let inverseCol = inverseColor(colorInfo.r, colorInfo.g, colorInfo.b);
-    colorEl.style.backgroundColor = colorInfo.hex;
-    nameEl.style.color = `rgb(${inverseCol.r},${inverseCol.g},${inverseCol.b})`;
-    nameEl.innerHTML = colorInfo.name + '<br />' + colorInfo.hex;
-    timeEl.style.color = `rgb(${inverseCol.r},${inverseCol.g},${inverseCol.b})`;
-    if (colorInfo.hsl[2] < 128) {
-        // dark background, so light shadow
-        timeEl.style.textShadow = '0 2px 1px white';
-        nameEl.style.textShadow = '0 1px 0px white';
-    } else {
-        // ligh background, so dark shadow
-        timeEl.style.textShadow = '0 2px 1px black';
-        nameEl.style.textShadow = '0 1px 0px black';
+    componentDidMount() {
+        this.clockTimer = setInterval(() => {
+            this.setState({ time: new Date() });
+        }, 1000);
     }
-}
 
-function startUpdateInterval(intervalInSecs) {
-    setInterval(() => {
-        update(colorEl, nameEl, timeEl, algoMap[algoChooser.value]);
-    }, Number(intervalInSecs) * 1000 || 3000);
-}
+    update() {
+        let colorInfo = algoMap[this.state.algorithm]();
+        let inverseCol = inverseColor(colorInfo.r, colorInfo.g, colorInfo.b);
+        let backgroundColor = colorInfo.hex;
+        let colorName = colorInfo.name;
+        let textColor = `rgb(${inverseCol.r},${inverseCol.g},${inverseCol.b})`;
+        let textShadow = null;
+        if (colorInfo.hsl[2] < 128) {
+            // dark background, so light shadow
+            textShadow = '0 2px 1px white';
+            textShadow = '0 1px 0px white';
+        } else {
+            // ligh background, so dark shadow
+            textShadow = '0 2px 1px black';
+            textShadow = '0 1px 0px black';
+        }
 
-// ---------------------- main ----------------------------
+        this.setState({
+            backgroundColor,
+            inverseColor,
+            textColor,
+            colorName,
+            textShadow
+        });
+        // refresh every n seconds (can be set by the user);
+        if (this.updateTimer) {
+            clearTimeout(this.updateTimer);
+        }
+        this.updateTimer = setTimeout(() => this.update(), this.state.updateInterval);
+    }
 
-const settingsContainer = document.getElementById('settings-container');
-const settings = document.getElementById('settings');
-const closeMenu = document.getElementById('closeMenu');
-const algoChooser = document.getElementById('algorithm');
-const intervalChooser = document.getElementById('interval');
-const colorEl = document.getElementById('main');
-const timeEl = document.getElementById('time');
-const nameEl = document.getElementById('name');
-const fullscreenBtn = document.getElementById('goFullscreen');
+    displayMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({ showMenu: true });
+    }
 
-const algoMap = {
-    getLinearColorForDayTime,
-    getRgbColorWheelValue,
-    getRandomColorValue
-};
+    hideMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({ showMenu: false });
+    }
 
-ntc.init();
-updateTime(timeEl);
-update(colorEl, nameEl, timeEl, algoMap[algoChooser.value]);
-setInterval(() => {
-    updateTime(timeEl);
-}, 1000);
-let timer = startUpdateInterval(intervalChooser.value);
+    onAlgoChange(e) {
+        this.setState({ algorithm: e.target.value }, () => this.update());
+    }
 
-algoChooser.addEventListener('change', e => {
-    update(colorEl, nameEl, timeEl, algoMap[algoChooser.value]);
-});
-
-intervalChooser.addEventListener('change', e => {
-    clearInterval(timer);
-    timer = startUpdateInterval(intervalChooser.value);
-});
-
-closeMenu.addEventListener('click', e => {
-    e.preventDefault();
-    settingsContainer.classList.remove('on');
-    return false;
-});
-
-document.body.addEventListener('click', () => {
-    settingsContainer.classList.add('on');
-});
-
-settingsContainer.addEventListener('click', e => {
-    e.stopPropagation();
-    settingsContainer.classList.remove('on');
-});
-
-settings.addEventListener('click', e => {
-    e.stopPropagation();
-});
-
-fullscreenBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (document.fullscreenElement) {
-        document.exitFullscreen();
-    } else {
-        if (document.fullscreenEnabled) {
-            document.body.requestFullscreen();
+    toggleFullscreen(e) {
+        e.stopPropagation();
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            if (document.fullscreenEnabled) {
+                document.body.requestFullscreen();
+            }
         }
     }
-});
+
+    componentWillUnmount() {
+        clearInterval(this.clockTimer);
+    }
+
+    render(
+        {},
+        { updateInterval, backgroundColor, inverseColor, textColor, colorName, textShadow, time, showMenu, algorithm }
+    ) {
+        let timeStr = `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(
+            2,
+            '0'
+        )}:${String(time.getSeconds()).padStart(2, '0')}`;
+        let algoItems = Object.keys(algoMap).map(key => {
+            return (
+                <option value={key} key={key}>
+                    {algoMap[key].description}
+                </option>
+            );
+        });
+
+        return (
+            <div id="main" style={{ backgroundColor }} onClick={this.displayMenu}>
+                <div id="time" style={{ color: textColor, textShadow }}>
+                    {timeStr}
+                </div>
+                <div id="name" style={{ color: textColor, textShadow }}>
+                    {colorName}
+                    <br />
+                    {backgroundColor}
+                </div>
+                <div id="settings-container" class={showMenu ? 'on' : ''} onClick={this.hideMenu}>
+                    <div id="settings" onClick={e => e.stopPropagation()}>
+                        <div style="display:flex;align-items:center;flex-direction:row;justify-content:space-between">
+                            <span style="padding: 5px;font-size:0.7rem;">
+                                colorclock by <a href="https://alexi.ch/">alexi.ch</a>
+                            </span>
+                            <a
+                                href="#"
+                                onClick={this.hideMenu}
+                                style="width:20px;height:20px;display:block;text-align:center;margin:5px;padding:5px;border-radius:50%;border:2px solid black;font-family:'Oxygen Mono';text-decoration:none;color:black"
+                            >
+                                X
+                            </a>
+                        </div>
+                        <div class="settings-form" style="flex-grow: 1">
+                            <div>
+                                <label>
+                                    Color Algorithm
+                                    <select value={algorithm} onChange={this.onAlgoChange}>
+                                        {algoItems}
+                                    </select>
+                                </label>
+                            </div>
+                            <div>
+                                <label>
+                                    Update interval [s]
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={updateInterval / 1000}
+                                        onChange={e => this.setState({ updateInterval: Number(e.target.value) * 1000 })}
+                                    />
+                                </label>
+                            </div>
+                            <div>
+                                <button type="button" onClick={this.toggleFullscreen}>
+                                    toggle Fullscreen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+render(<Main />, document.body);
